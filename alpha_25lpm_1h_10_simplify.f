@@ -35,7 +35,7 @@ C   [2] VARIABLES
       INTEGER  SOLIDT,ZT(3),ZB(3),ZR(3),ZL(3)
      &        ,CX(9),CY(9),OPP(9)
       REAL*8  CONVGENCEU,CONVGENCEV,TOL,W(9)
-      DATA CX /0,1,0,-1,0,1,-1,-1,1/
+      DATA CX /0,1,0,-1,0,1,-1,-1,1/ !velocity vectors ei for D2Q9 (eq 2.25)
       DATA CY /0,0,1,0,-1,1,1,-1,-1/
       DATA OPP /1,4,5,2,3,8,9,6,7/
       DATA ZT /5,8,9/
@@ -405,8 +405,8 @@ C     INITIAL VELOCITY, DENSITY AND PRESSURE IN THE 2D CHANNEL
       OLDU(1:XN,1:YN) = 0.0000
       OLDV(1:XN,1:YN) = 0.0000
       DO I = 1,9    !2.21
-            CU(1:XN,1:YN) = 3.0*( CX(I)*U(1:XN,1:YN) + CY(I)*V(1:XN,1:YN) ) 
-            pIn(1:XN,1:YN,I) = W(I)*P(1:XN,1:YN)
+            CU(1:XN,1:YN) = 3.0*( CX(I)*U(1:XN,1:YN) + CY(I)*V(1:XN,1:YN) ) ! 3*ei*u (eq 2.21)
+            pIn(1:XN,1:YN,I) = W(I)*P(1:XN,1:YN)            !f^(eq)_(i) (eq 2.21)
             &           *( 1 + CU(1:XN,1:YN)/C + 0.5*CU(1:XN,1:YN)**2/C**2
             &           - 1.5*(U(1:XN,1:YN)**2 + V(1:XN,1:YN)**2)/C**2 )
       END DO
@@ -439,8 +439,8 @@ C     Left Inlet
       U(1,1:YN) = UMAX
       V(1,1:YN) = 0.000
 C     Right Inlet
-      U(XN,1:YN) = 4.0/3.0*U(XN-1,1:YN)-1.0/3.0*U(XN-2,1:YN)
-      V(XN,1:YN) = 4.0/3.0*V(XN-1,1:YN)-1.0/3.0*V(XN-2,1:YN)
+      U(XN,1:YN) = 4.0/3.0*U(XN-1,1:YN)-1.0/3.0*U(XN-2,1:YN) !outlet boundary eq(2.38)
+      V(XN,1:YN) = 4.0/3.0*V(XN-1,1:YN)-1.0/3.0*V(XN-2,1:YN) !outlet boundary eq(2.39)
       END SUBROUTINE MacroBC
 C===================================================================================================
       SUBROUTINE MicroBC 
@@ -450,7 +450,7 @@ C===============================================================================
       USE CONST3
       USE CONST4
 C           INLET
-      P(1,1:YN)=( pin(1,1:YN,1)+pin(1,1:YN,3)+pin(1,1:YN,5)
+      P(1,1:YN)=( pin(1,1:YN,1)+pin(1,1:YN,3)+pin(1,1:YN,5)       !chapter 3 of On pressure and velocity flow boundary conditions and bounceback for the lattice Boltzmann BGK model, Zou and He, 1997
       &          +2*(pin(1,1:YN,7)+pin(1,1:YN,4)+pin(1,1:YN,8)) )
       &             /((1-U(1,1:YN))/C)
       pIn(1,1:YN,2) = pIn(1,1:YN,4)+2.0/3.0*P(1,1:YN)/C*U(1,1:YN)    
@@ -527,10 +527,10 @@ C===============================================================================
 C     FLUID COLLISION STEP
       DO J = 1,9
             CU(1:XN,1:YN) = 3.0*(CX(J)*U(1:XN,1:YN)+CY(J)*V(1:XN,1:YN))
-            pEq(1:XN,1:YN,J) = W(J)*P(1:XN,1:YN)
+            pEq(1:XN,1:YN,J) = W(J)*P(1:XN,1:YN)                              !eq(2.21)
             &     *( 1 + CU(1:XN,1:YN)/C + 0.5*CU(1:XN,1:YN)**2/C**2
             &       - 1.5*(U(1:XN,1:YN)**2 + V(1:XN,1:YN)**2)/C**2 ) 
-            pOut(1:XN,1:YN,J) = pIn(1:XN,1:YN,J)-
+            pOut(1:XN,1:YN,J) = pIn(1:XN,1:YN,J)-                             !eq(2.13)
             &               (1.0/TauF)*(pIn(1:XN,1:YN,J)-pEq(1:XN,1:YN,J))
       END DO
 C!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -560,12 +560,12 @@ C           The nodes are nearby the wall surface.(the solid part)
             end do    
             Delta = ( (SFACEX(I)+fpx-xw)**2+(SFACEY(I)+fpy-yw)**2 )**0.5
             &       /( fpx**2+fpy**2 )**0.5
-            IF (Delta >= 1.0/2.0) THEN
+            IF (Delta >= 1.0/2.0) THEN    !eq(2.49)
                   Chi = (2.0*Delta-1.0)/(TauF+1.0/2.0)
                   Ubf = (1.0-3.0/(2.0*delta))*U(SFACEX(I)+fpx,SFACEY(I)+fpy)
                   Vbf = (1.0-3.0/(2.0*delta))*V(SFACEX(I)+fpx,SFACEY(I)+fpy)
-            ElSE
-                  Chi = (2.0*Delta-1.0)/(TauF-2.0)
+            ElSE                                            !eq(2.50)
+                  Chi = (2.0*Delta-1.0)/(TauF-2.0)    
                   Ubf = U(SFACEX(I)+fpx*2,SFACEY(I)+fpy*2)
                   Vbf = V(SFACEX(I)+fpx*2,SFACEY(I)+fpy*2)
             END IF
@@ -591,7 +591,7 @@ C           The nodes are nearby the wall surface.(the solid part)
                   &        ,(real_faceY(I)-1.5)/(YN-2),0,0
             end do
       end if
-c     BOUNCE BACK
+c     BOUNCE BACK 
       pIn(1:XN,YN,5) = pOut(1:XN,1,5)
       pIn(1:XN,YN,8) = pOut(1:XN,1,8)
       pIn(1:XN,YN,9) = pOut(1:XN,1,9)
