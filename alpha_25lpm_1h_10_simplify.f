@@ -52,7 +52,7 @@ C   [3] PHYSICAL CONSTANTS
       END MODULE CONST3
 C   [4] PARTICLES
       MODULE CONST4      
-      integer,parameter:: sampnumb=1000000
+      integer,parameter:: sampnumb=1000000 !total particle number
       REAL*8  dp,densityP,Mg,Tg,R,lambdaG,Cunnin,f,Vp,A
      &       ,RelaxT,Stokes,BoltC,Fb,Gravity,pi,BMD,Pe
      &       ,Repx,Repy,Resx,Resy,Betax,Betay,slfcx,slfcy
@@ -122,25 +122,25 @@ C   Microscopic properties
       DT_LB = DX_LB/C ! uniform time step size in LATTICE BOLZMANN UNITS
       do I=1,100000  ! find the characteristic sound speed that is suitable for converting dimensional to LBM units.
             Co = U_P*I !(m/s) 
-            Ma_P = U_P/(cs*Co)
+            Ma_P = U_P/(cs*Co) !physical Mach no. 
             TauF = 0.5 + 3.0*( NU_P/(Co*L_P) )/(C**2*DT_LB) 
             if ((Ma_P<0.15) .and. (TauF<1)) then
                   WRITE(3,*) "auto I=",I
                   exit
             end if
       end do      
-      UMAX = U_P/Co      
-      DT_P = L_P/Co*DT_LB !(s)     
-      RE_LB = UMAX*DX_LB*real(YN-2)/( NU_P/(Co*L_P) )
-      Ma_LB = UMAX/CS
+      UMAX = U_P/Co      !inlet velocity in LBM unit
+      DT_P = L_P/Co*DT_LB !(s)  Physical time step   
+      RE_LB = UMAX*DX_LB*real(YN-2)/( NU_P/(Co*L_P) ) !Reynolds number in LB unit
+      Ma_LB = UMAX/CS !LB mach no.
       p0 = 1.d0/3.d0
       W(1) = 4.d0/9.d0 ! (2.26) in thesis
       W(2:5) = 1.d0/9.d0 ! (2.26) in thesis
       W(6:9) = 1.d0/36.d0 ! (2.26) in thesis
 C   Block Parameters
-      BLKRAD1 = real(YN-2)*BHR*0.5
-      BLKCNTY1 =  (YN-2)*0.5 + 2
-      BLKCNTX1 =  (XN-1)*0.5 
+      BLKRAD1 = real(YN-2)*BHR*0.5 !the radius of the cylinder 
+      BLKCNTY1 =  (YN-2)*0.5 + 2 !the j index of the cylinder center
+      BLKCNTX1 =  (XN-1)*0.5  !the i index of the cylinder center
       BLKLHS1 = BLKCNTX1 - BLKRAD1
       BLKRHS1 = BLKCNTX1 + BLKRAD1
       BLKBOT1 = BLKCNTY1 - BLKRAD1
@@ -152,9 +152,9 @@ C CYLINDRICAL
 C                 1st CYLINDER  
                   SOLIDT1 = (I-BLKCNTX1)**2 + (J-BLKCNTY1)**2
                   IF ( SOLIDT1 <= BLKRAD1**2  )  THEN
-                        SOLIDT = SOLIDT + 1
-                        SOLIDX(SOLIDT) = I
-                        SOLIDY(SOLIDT) = J
+                        SOLIDT = SOLIDT + 1 !number of nodes in the solid 
+                        SOLIDX(SOLIDT) = I !the I index of nodes in the solid 
+                        SOLIDY(SOLIDT) = J !the J index of nodes in the solid 
                   END IF
             END DO
       END DO
@@ -169,9 +169,9 @@ C     1st BALL SURFACE
       do I = 1,1440
             fx=int(BLKRAD1*cos(I*pi/720))+BLKCNTX1
             fy=int(BLKRAD1*sin(I*pi/720))+BLKCNTY1
-            SFACET = SFACET + 1           
-            SFACEX(SFACET) = fx
-            SFACEY(SFACET) = fy
+            SFACET = SFACET + 1    !number of points on the cylinder surface       
+            SFACEX(SFACET) = fx     !the I index of points on the cylinder surface 
+            SFACEY(SFACET) = fy     !the J index of points on the cylinder surface
       end do    
       write(313,*) 'VARIABLES = "X","Y","p","c"'
       write(313,*) 'ZONE T="present"'
@@ -188,32 +188,32 @@ C     Particle parameters!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       Mg = 28.966     ! AIR MOLECULAR WEIGHT (kg/kmol)
       Tg = 300.0        ! gas temperature (K)
       R = 8.31451     ! kJ/kmol-K
-      lambdaG = NU_P*(pi*Mg/2.0/R/Tg/1000.0)**0.5    ! (m)
-      Cunnin = 1.0 + 2.0*lambdaG/dp*
+      lambdaG = NU_P*(pi*Mg/2.0/R/Tg/1000.0)**0.5    ! (m) molecule mean free path (eq 2.55)
+      Cunnin = 1.0 + 2.0*lambdaG/dp* !cunningham correction factor (eq 2.54)
      &      (1.252 + 0.399*exp(-1.1*dp/2.0/lambdaG))
-      f = 3.0*pi*mu*dp/Cunnin    !(kg/s)
+      f = 3.0*pi*mu*dp/Cunnin    !(kg/s) drag force terms (eq 2.53)
       Vp = 4.0/3.0*pi*(dp/2.0)**3    ! particle volume (m^3)
       A = densityP*Vp      !mass of particle (kg)
       RelaxT = A/f     ! Relaxation time(s)   
 C     Stokes = RelaxT*U_P/BLOK
-      Stokes=Cunnin*(dp**2)*(densityP/densityG)*
+      Stokes=Cunnin*(dp**2)*(densityP/densityG)* !stokes number
      &  (RE_P*BHR)/(18.0*(BLOK**2))
 C     BROWNIAN 
-      BoltC = 1.38E-23 !J/K
-      Fb = (6.0*pi*mu*dp*BoltC*Tg/Cunnin/DT_P)**0.5
-      BMD = (BoltC*Tg*Cunnin)/(3.0*pi*mu*dp)
-      Pe = U_P*BLOK/BMD
+      BoltC = 1.38E-23 !J/K Boltzmann constant (eq 2.57)
+      Fb = (6.0*pi*mu*dp*BoltC*Tg/Cunnin/DT_P)**0.5 !Brounign motion terms (eq 2.57)
+      BMD = (BoltC*Tg*Cunnin)/(3.0*pi*mu*dp) !(eq 2.80)
+      Pe = U_P*BLOK/BMD !Peclet number (eq 2.80)
 C     Gravigy 
-      Gravity = (densityP-densityG)*Vp*(-9.8) 
+      Gravity = (densityP-densityG)*Vp*(-9.8) !Gravity terms (eq 2.56)
 c     Gravity = 0
       CALL INPUT
       call random_seed()
 C     dimensional location
-      dim_x(1:XN) = X(1:XN)*L_P
-      dim_y(1:YN) = Y(1:YN)*L_P    
+      dim_x(1:XN) = X(1:XN)*L_P !physical x 
+      dim_y(1:YN) = Y(1:YN)*L_P !physical y
 C     Collision BC
 C     CHANNEL WALLS
-      LeftBD = dim_x(1) + dp/2.0
+      LeftBD = dim_x(1) + dp/2.0 !the particle can go in x direction of the compusational domain
       RightBD = dim_x(XN) - dp/2.0
       TopBD = dim_y(YN)
       BotBD = dim_y(1)
@@ -239,8 +239,8 @@ C     TO EXTRACT PARTICLE TRACE
 C     TO EXTRACT PERIODICAL DATA
       Periodcunt = 1.0
 C     ITERATION, TOL, CONSTS
-      TSTEP = 100000000
-      TOL = 1E-6
+      TSTEP = 100000000 
+      TOL = 1E-6 !residual criteria
       WRITE(3,*) "uIn=",UMAX
       WRITE(3,*) "TSTEP=",TSTEP
       WRITE(3,*) "TAUF=",TauF
@@ -282,16 +282,16 @@ C      particle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             IF ( (CONVGENCEU<TOL) .AND. (CONVGENCEV<TOL) )THEN !!!steady state
 c           IF ( (L>=1) ) THEN
 c           IF ( (L>TSTEP) ) THEN
-                  CONT_DTP = CONT_DTP + DT_P
+                  CONT_DTP = CONT_DTP + DT_P !count time when released particle
 c                 PARTICLE SETS RELEASED
                   IF ( (CONT_DTP>=5*DT_P) .and. (np<sampnumb) )THEN 
                         np = np + npset
 C                       Initial Particle velocity for a new particle set
-                        uxp( (np-npset+1) : np ) = U_P 
-                        uyp( (np-npset+1) : np ) = 0.000
+                        uxp( (np-npset+1) : np ) = U_P  !velocity in x direction of particle
+                        uyp( (np-npset+1) : np ) = 0.000 !velocity in y direction of particle
 C                       Initial Particle position for a new particle set
-                        xp( (np-npset+1) : np) = dim_x(3)
-                        call random_number( yp( (np-npset+1):(np) ) )
+                        xp( (np-npset+1) : np) = dim_x(3) !physcial x location of particle
+                        call random_number( yp( (np-npset+1):(np) ) ) !physical y location of particle
                         yp( (np-npset+1):(np) ) = yp( (np-npset+1):(np) )*L_P
                         CONT_DTP = 0.0
                   END IF         
