@@ -218,10 +218,10 @@ C     CHANNEL WALLS
       TopBD = dim_y(YN)
       BotBD = dim_y(1)
 C     OBSTACLES
-      LBlkBD1 = dim_x(BLKCNTX1)- (BLOK + dp)/2.0
-      RBlkBD1 = dim_x(BLKCNTX1)+ (BLOK + dp)/2.0
-      TopBlkBD1 = dim_y(BLKCNTY1)+ (BLOK + dp)/2.0
-      BotBlkBD1 = dim_y(BLKCNTY1)- (BLOK + dp)/2.0
+
+  
+
+
 C     Initial Setting
 C     TO EXTRACT FLUID & PARTICLE DATA
       CONT = 0
