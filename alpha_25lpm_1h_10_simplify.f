@@ -689,24 +689,24 @@ C     Dimensional velocity
       D = 0
       dim_U(1:XN,1:YN) = U(1:XN,1:YN)*Co
       dim_V(1:XN,1:YN) = V(1:XN,1:YN)*Co
-      DO I = 1,np
+      DO I = 1,np  
             SOLIDT1 = ( xp(I)-dim_x(BLKCNTX1) )**2 + 
             &          ( yp(I)-dim_y(BLKCNTY1) )**2
-            IF (   yp(I)< BotBD  )THEN
-                  xp(I) = xp(I)
+            IF (   yp(I)< BotBD  )THEN    ! line695-712 periodic BC
+                  
                   yp(I) = yp(I) + (TopBD - BotBD) !yp(I) 
             ELSEIF (  yp(I)> TopBD  )THEN
-                  xp(I) = xp(I)
+                  
                   yp(I) = yp(I) - (TopBD - BotBD) !yp(I)      
             ELSEIF  ( xp(I)<= LeftBD )  THEN
                   xp(I) = xp(I)+ dim_x(4)
-                  yp(I) = yp(I) 
+                   
                   IF (I<=sampnumb)THEN
                         capnumb(1) = capnumb(1) + 1 
                   ENDIF   
             ELSEIF (  xp(I)>= RightBD   )THEN
-                  xp(I) = xp(I)
-                  yp(I) = yp(I) 
+                  
+                  
                   IF (I<=sampnumb)THEN
                         capnumb(2) = capnumb(2) + 1 
             ENDIF
@@ -715,8 +715,8 @@ C           CYLINDER 1
             IF (I<=sampnumb)THEN
                   capnumb(3) = capnumb(3) + 1  !TOTAL TRAPPED PARTICLES 
             END IF   
-            xp(I) = xp(I)
-            yp(I) = yp(I)  
+            
+            
             If (count(I) == 0) THEN
                   rdegree(I)=atan2(yp(I)-dim_y(BLKCNTY1),xp(I)-dim_x(BLKCNTX1))
                   idegree(I) = int(rdegree(I)/pi*180)
