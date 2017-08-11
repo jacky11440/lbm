@@ -701,7 +701,7 @@ C     Dimensional velocity
             ELSEIF  ( xp(I)<= LeftBD )  THEN
                   xp(I) = xp(I)+ dim_x(4)
                    
-                  IF (I<=sampnumb)THEN
+                  IF (I<=sampnumb)THEN   !meaningless ?
                         capnumb(1) = capnumb(1) + 1 
                   ENDIF   
             ELSEIF (  xp(I)>= RightBD   )THEN
@@ -709,108 +709,108 @@ C     Dimensional velocity
                   
                   IF (I<=sampnumb)THEN
                         capnumb(2) = capnumb(2) + 1 
-            ENDIF
+                  ENDIF
 C           CYLINDER 1
             ELSEIF ( SOLIDT1 <= ( (BLOK + dp)/2.0 )**2 )THEN
-            IF (I<=sampnumb)THEN
-                  capnumb(3) = capnumb(3) + 1  !TOTAL TRAPPED PARTICLES 
-            END IF   
+				IF (I<=sampnumb)THEN
+					capnumb(3) = capnumb(3) + 1  !TOTAL TRAPPED PARTICLES 
+				END IF   
             
             
-            If (count(I) == 0) THEN
-                  rdegree(I)=atan2(yp(I)-dim_y(BLKCNTY1),xp(I)-dim_x(BLKCNTX1))
-                  idegree(I) = int(rdegree(I)/pi*180)
-                  if (yp(I)<dim_y(BLKCNTY1))then
+				If (count(I) == 0) THEN  !meaningless ?
+					rdegree(I)=atan2(yp(I)-dim_y(BLKCNTY1),xp(I)-dim_x(BLKCNTX1))
+					idegree(I) = int(rdegree(I)/pi*180)
+					if (yp(I)<dim_y(BLKCNTY1))then
                         idegree(I) = int(rdegree(I)/pi*180+360)
-                  end if   
-                  degree1(I) = idegree(I)
-                  denumber1(degree1(I))=denumber1(degree1(I))+1
-                  D = D + 1
-                  depxp(D) = xp(I)
-                  depyp(D) = yp(I)
-                  count(I) = 1
-            END IF
+					end if   
+					degree1(I) = idegree(I)
+					denumber1(degree1(I))=denumber1(degree1(I))+1
+					D = D + 1
+					depxp(D) = xp(I)
+					depyp(D) = yp(I)
+					count(I) = 1
+				END IF
             ELSE
-c                 Fluid velocity at RHS of particle
-                  XPP = xp(I) + dp/2.0
-                  YPP = yp(I)
-                  CALL PVELOCITY
-                  RhsUx = Uxg
-                  RhsUy = Uyg
-C                 Fluid velocity at LHS of particle
-                  XPP = xp(I) - dp/2.0
-                  YPP = yp(I)
-                  CALL PVELOCITY
-                  LhsUx = Uxg
-                  LhsUy = Uyg
-C                 Fluid velocity at Top of particle
-                  XPP = xp(I)
-                  YPP = yp(I)+ dp/2.0
-                  CALL PVELOCITY
-                  TopUx = Uxg
-                  TopUy = Uyg
-C                 Fluid velocity at Bottom of particle  
-                  XPP = xp(I)
-                  YPP = yp(I)- dp/2.0
-                  CALL PVELOCITY
-                  BotUx = Uxg
-                  BotUy = Uyg
-C                 Fluid velocity at the position of the particle
-                  XPP = xp(I)
-                  YPP = yp(I)
-                  CALL PVELOCITY
+c               Fluid velocity at RHS of particle
+                XPP = xp(I) + dp/2.0
+                YPP = yp(I)
+                CALL PVELOCITY
+                RhsUx = Uxg
+                RhsUy = Uyg
+C               Fluid velocity at LHS of particle
+                XPP = xp(I) - dp/2.0
+                YPP = yp(I)
+				CALL PVELOCITY
+                LhsUx = Uxg
+                LhsUy = Uyg
+C                Fluid velocity at Top of particle
+                XPP = xp(I)
+                YPP = yp(I)+ dp/2.0
+                CALL PVELOCITY
+                TopUx = Uxg
+                TopUy = Uyg
+C               Fluid velocity at Bottom of particle  
+                XPP = xp(I)
+                YPP = yp(I)- dp/2.0
+                CALL PVELOCITY
+                BotUx = Uxg
+                BotUy = Uyg
+C               Fluid velocity at the position of the particle
+                XPP = xp(I)
+                YPP = yp(I)
+                CALL PVELOCITY
 c==============================================================================================
 c==============================================================================================
-                  Repx = dp/Nu_P*abs( Uxg-uxp(I))
-                  Repy = dp/Nu_P*abs( Uyg-uyp(I))
-                  Resx = dp**2/Nu_P*( 0.5*abs(RhsUy - LhsUy)/dp )
-                  Resy = dp**2/NU_P*( 0.5*abs(TopUx - BotUx)/dp )
-                  Betax = 0.5*Resx/Repx
-                  Betay = 0.5*Resy/Repy
-                  if (Repx<=40) THEN
-                        slfcx = (1.0-0.3314*Betax**0.5)*exp(-0.1*Repx)+0.3314*Betax**0.5
-                  else
-                        slfcx = 0.0524*(0.5*Resx)**0.5
-                  End If
-                  IF (Repy<=40) THEN
-                        slfcy = (1.0-0.3314*Betay**0.5)*exp(-0.1*Repy)+0.3314*Betay**0.5
-                  else
-                        slfcy = 0.0524*(0.5*Resy)**0.5
-                  End If
+                Repx = dp/Nu_P*abs( Uxg-uxp(I))
+                Repy = dp/Nu_P*abs( Uyg-uyp(I))
+                Resx = dp**2/Nu_P*( 0.5*abs(RhsUy - LhsUy)/dp )
+                Resy = dp**2/NU_P*( 0.5*abs(TopUx - BotUx)/dp )
+                Betax = 0.5*Resx/Repx
+                Betay = 0.5*Resy/Repy
+                if (Repx<=40) THEN
+                    slfcx = (1.0-0.3314*Betax**0.5)*exp(-0.1*Repx)+0.3314*Betax**0.5
+                else
+                    slfcx = 0.0524*(0.5*Resx)**0.5
+                End If
+                IF (Repy<=40) THEN
+                    slfcy = (1.0-0.3314*Betay**0.5)*exp(-0.1*Repy)+0.3314*Betay**0.5
+                else
+                    slfcy = 0.0524*(0.5*Resy)**0.5
+                End If
 c==============================================================================================
 c==============================================================================================
-                  sign1 = 1
-C                 Fluid lift force without velocity term (kg/s)
-                  Lx = 1.615*densityG*NU_P**0.5*dp**2
-                  & *( abs(RhsUy - LhsUy)/dp )**0.5
-                  &   *sign( sign1, (RhsUy - LhsUy)/dp )*slfcx
-                  Ly = 1.615*densityG*NU_P**0.5*dp**2
-                  & *( abs(TopUx - BotUx)/dp )**0.5
-                  &   *sign( sign1, (TopUx - BotUx)/dp )*slfcy
-C                 Bforce    (N)
-                  call random_number(U1 )
-                  call random_number(U2 )
-                  Gx = ( -2.0*log(U1) )**0.5*cos(2.0*pi*U2)
-                  Gy = ( -2.0*log(U1) )**0.5*sin(2.0*pi*U2)
-                  Bx = Fb*Gx
-                  By = Gravity + Fb*Gy      
-C                 Particle velocity (m/s)
-                  olduxp(I) = uxp(I)
-                  uxp(I) = (olduxp(I) - ( Uxg + Bx/(f+Lx) ) )*exp(-(f+Lx)/A*DT_P) 
-                  &       + Uxg + Bx/(f+Lx)
-                  olduyp(I) = uyp(I)
-                  uyp(I) = (olduyp(I) - ( Uyg + By/(f+Ly) ) )*exp(-(f+Ly)/A*DT_P)
-                  &       + Uyg + By/(f+Ly)
-C                 Particle position (m)
-                  oldxp(I) = xp(I)
-                  xp(I) = oldxp(I) + (Uxg + Bx/(f+Lx) )*DT_P + A/(f+Lx)*
-                  &( olduxp(I) - Uxg - Bx/(f+Lx) )*(1.0)*( 1.0-exp(-(f+Lx)*DT_P/A) )
-                  oldyp(I) = yp(I)
-                  yp(I) = oldyp(I) + (Uyg + By/(f+Ly) )*DT_P + A/(f+Ly)*
-                  &( olduyp(I) - Uyg - By/(f+Ly) )*(1.0)*( 1.0-exp(-(f+Ly)*DT_P/A) )
+                sign1 = 1
+C               Fluid lift force without velocity term (kg/s)
+                Lx = 1.615*densityG*NU_P**0.5*dp**2
+                & *( abs(RhsUy - LhsUy)/dp )**0.5
+                &   *sign( sign1, (RhsUy - LhsUy)/dp )*slfcx
+                Ly = 1.615*densityG*NU_P**0.5*dp**2
+                & *( abs(TopUx - BotUx)/dp )**0.5
+                &   *sign( sign1, (TopUx - BotUx)/dp )*slfcy
+C               Bforce    (N)
+                call random_number(U1 )
+                call random_number(U2 )
+                Gx = ( -2.0*log(U1) )**0.5*cos(2.0*pi*U2)
+                Gy = ( -2.0*log(U1) )**0.5*sin(2.0*pi*U2)
+                Bx = Fb*Gx
+                By = Gravity + Fb*Gy      
+C               Particle velocity (m/s)
+                olduxp(I) = uxp(I)
+                uxp(I) = (olduxp(I) - ( Uxg + Bx/(f+Lx) ) )*exp(-(f+Lx)/A*DT_P) 
+                &       + Uxg + Bx/(f+Lx)
+                olduyp(I) = uyp(I)
+                uyp(I) = (olduyp(I) - ( Uyg + By/(f+Ly) ) )*exp(-(f+Ly)/A*DT_P)
+                &       + Uyg + By/(f+Ly)
+C               Particle position (m)
+                oldxp(I) = xp(I)
+                xp(I) = oldxp(I) + (Uxg + Bx/(f+Lx) )*DT_P + A/(f+Lx)*
+                &( olduxp(I) - Uxg - Bx/(f+Lx) )*(1.0)*( 1.0-exp(-(f+Lx)*DT_P/A) )
+                oldyp(I) = yp(I)
+                yp(I) = oldyp(I) + (Uyg + By/(f+Ly) )*DT_P + A/(f+Ly)*
+                &( olduyp(I) - Uyg - By/(f+Ly) )*(1.0)*( 1.0-exp(-(f+Ly)*DT_P/A) )
             ENDIF
-      ENDDO
-      IF(capnumb(3)+capnumb(2)>=sampnumb)THEN
+		ENDDO
+		IF(capnumb(3)+capnumb(2)>=sampnumb)THEN
             WRITE(4,*) 'capnumb AT left WALL=',capnumb(1)
             WRITE(4,*) 'capnumb AT right WALL=',capnumb(2)
             WRITE(4,*) 'capnumb AT CYLINDER 1',capnumb(3)
