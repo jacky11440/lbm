@@ -692,7 +692,7 @@ C     Dimensional velocity
       DO I = 1,np  
             SOLIDT1 = ( xp(I)-dim_x(BLKCNTX1) )**2 + 
             &          ( yp(I)-dim_y(BLKCNTY1) )**2
-            IF (   yp(I)< BotBD  )THEN    ! line695-712 periodic BC
+            IF (   yp(I)< BotBD  )THEN    ! line695-700 periodic BC
                   
                   yp(I) = yp(I) + (TopBD - BotBD) !yp(I) 
             ELSEIF (  yp(I)> TopBD  )THEN
@@ -761,18 +761,18 @@ C               Fluid velocity at the position of the particle
                 CALL PVELOCITY
 c==============================================================================================
 c==============================================================================================
-                Repx = dp/Nu_P*abs( Uxg-uxp(I))
+                Repx = dp/Nu_P*abs( Uxg-uxp(I))				!(eq 2.64)
                 Repy = dp/Nu_P*abs( Uyg-uyp(I))
-                Resx = dp**2/Nu_P*( 0.5*abs(RhsUy - LhsUy)/dp )
+                Resx = dp**2/Nu_P*( 0.5*abs(RhsUy - LhsUy)/dp )	!(eq 2.65)
                 Resy = dp**2/NU_P*( 0.5*abs(TopUx - BotUx)/dp )
-                Betax = 0.5*Resx/Repx
+                Betax = 0.5*Resx/Repx						!(eq 2.67)
                 Betay = 0.5*Resy/Repy
-                if (Repx<=40) THEN
+                if (Repx<=40) THEN							!(eq 2.62)
                     slfcx = (1.0-0.3314*Betax**0.5)*exp(-0.1*Repx)+0.3314*Betax**0.5
                 else
                     slfcx = 0.0524*(0.5*Resx)**0.5
                 End If
-                IF (Repy<=40) THEN
+                IF (Repy<=40) THEN							!(eq 2.63)
                     slfcy = (1.0-0.3314*Betay**0.5)*exp(-0.1*Repy)+0.3314*Betay**0.5
                 else
                     slfcy = 0.0524*(0.5*Resy)**0.5
@@ -781,29 +781,29 @@ c===============================================================================
 c==============================================================================================
                 sign1 = 1
 C               Fluid lift force without velocity term (kg/s)
-                Lx = 1.615*densityG*NU_P**0.5*dp**2
+                Lx = 1.615*densityG*NU_P**0.5*dp**2				!(eq 2.72)
                 & *( abs(RhsUy - LhsUy)/dp )**0.5
                 &   *sign( sign1, (RhsUy - LhsUy)/dp )*slfcx
-                Ly = 1.615*densityG*NU_P**0.5*dp**2
+                Ly = 1.615*densityG*NU_P**0.5*dp**2				!(eq 2.73)
                 & *( abs(TopUx - BotUx)/dp )**0.5
                 &   *sign( sign1, (TopUx - BotUx)/dp )*slfcy
 C               Bforce    (N)
                 call random_number(U1 )
                 call random_number(U2 )
-                Gx = ( -2.0*log(U1) )**0.5*cos(2.0*pi*U2)
+                Gx = ( -2.0*log(U1) )**0.5*cos(2.0*pi*U2)		!(eq 2.58)
                 Gy = ( -2.0*log(U1) )**0.5*sin(2.0*pi*U2)
                 Bx = Fb*Gx
                 By = Gravity + Fb*Gy      
 C               Particle velocity (m/s)
                 olduxp(I) = uxp(I)
-                uxp(I) = (olduxp(I) - ( Uxg + Bx/(f+Lx) ) )*exp(-(f+Lx)/A*DT_P) 
+                uxp(I) = (olduxp(I) - ( Uxg + Bx/(f+Lx) ) )*exp(-(f+Lx)/A*DT_P) 		!(eq 2.76)
                 &       + Uxg + Bx/(f+Lx)
                 olduyp(I) = uyp(I)
                 uyp(I) = (olduyp(I) - ( Uyg + By/(f+Ly) ) )*exp(-(f+Ly)/A*DT_P)
                 &       + Uyg + By/(f+Ly)
 C               Particle position (m)
                 oldxp(I) = xp(I)
-                xp(I) = oldxp(I) + (Uxg + Bx/(f+Lx) )*DT_P + A/(f+Lx)*
+                xp(I) = oldxp(I) + (Uxg + Bx/(f+Lx) )*DT_P + A/(f+Lx)*					!(eq 2.77)
                 &( olduxp(I) - Uxg - Bx/(f+Lx) )*(1.0)*( 1.0-exp(-(f+Lx)*DT_P/A) )
                 oldyp(I) = yp(I)
                 yp(I) = oldyp(I) + (Uyg + By/(f+Ly) )*DT_P + A/(f+Ly)*
@@ -997,4 +997,4 @@ C===============================================================================
                   write(320,*) delta_DEGREE,Cp
             end do
       end do
-      END SUBROUTINE Cp_dimensionless_number       
+      END SUBROUTINE Cp_dimensionless_number        !pressure drop (P(3,(YN-1)/2)-P(XN-2,(YN-1)/2))*densityG*Co**2
