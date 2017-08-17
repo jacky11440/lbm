@@ -558,10 +558,10 @@ C           The nodes are nearby the wall surface.(the solid part)
                         exit
                   end if
             end do    
-            Delta = ( (SFACEX(I)+fpx-xw)**2+(SFACEY(I)+fpy-yw)**2 )**0.5
+            Delta = ( (SFACEX(I)+fpx-xw)**2+(SFACEY(I)+fpy-yw)**2 )**0.5 !eq(2.46)
             &       /( fpx**2+fpy**2 )**0.5
             IF (Delta >= 1.0/2.0) THEN    !eq(2.49)
-                  Chi = (2.0*Delta-1.0)/(TauF+1.0/2.0)
+                  Chi = (2.0*Delta-1.0)/(TauF+1.0/2.0)			!different with thesis?
                   Ubf = (1.0-3.0/(2.0*delta))*U(SFACEX(I)+fpx,SFACEY(I)+fpy)
                   Vbf = (1.0-3.0/(2.0*delta))*V(SFACEX(I)+fpx,SFACEY(I)+fpy)
             ElSE                                            !eq(2.50)
@@ -573,11 +573,11 @@ C           The nodes are nearby the wall surface.(the solid part)
                   CUb = 3.0*(CX(J)*Ubf + CY(J)*Vbf)
                   CUf = 3.0*(CX(J)*U(SFACEX(I)+fpx,SFACEY(I)+fpy)
                   &         + CY(J)*V(SFACEX(I)+fpx,SFACEY(I)+fpy))
-                  pEq(SFACEX(I),SFACEY(I),J) = W(J)*P(SFACEX(I)+fpx,SFACEY(I)+fpy)
+                  pEq(SFACEX(I),SFACEY(I),J) = W(J)*P(SFACEX(I)+fpx,SFACEY(I)+fpy)  !eq(2.48)
                   &      *( 1.0 + CUb/C + 0.5 *CUf*CUf/C**2
                   &     - 1.5*(U(SFACEX(I)+fpx,SFACEY(I)+fpy)**2 
                   &          + V(SFACEX(I)+fpx,SFACEY(I)+fpy)**2)/C**2  )
-                  pOut(SFACEX(I),SFACEY(I),opp(J)) =
+                  pOut(SFACEX(I),SFACEY(I),opp(J)) =								!eq(2.47)
                   &              (1.0-Chi)* pOut(SFACEX(I)+fpx,SFACEY(I)+fpy,J)
                   &                 + Chi * pEq(SFACEX(I),SFACEY(I),J)
             END DO
