@@ -1,9 +1,9 @@
-C   THE CODE IS TO USE LATTICE BOLTZMANN METHOD TO SIMULATE
-C   POISEUILLE FLOW
-C   DEFINE VARIABLES
+!   THE CODE IS TO USE LATTICE BOLTZMANN METHOD TO SIMULATE
+!   POISEUILLE FLOW
+!   DEFINE VARIABLES
 
 
-C   [1] COORDINATION
+!   [1] COORDINATION
 
       MODULE CONST1   
       integer,parameter:: XN=300
@@ -21,7 +21,7 @@ C   [1] COORDINATION
       REAL*8  CONVU(XN,YN),CONVV(XN,YN)
      &       ,OLDU(XN,YN),OLDV(XN,YN) 
       END MODULE CONST1
-C   [2] VARIABLES
+!   [2] VARIABLES
       MODULE CONST2
       INTEGER    L,TSTEP,z
      &          ,BLKLHS1,BLKRHS1,BLKTOP1,BLKBOT1
@@ -43,14 +43,14 @@ C   [2] VARIABLES
       DATA ZR /7,4,8/
       DATA ZL /2,6,9/
       END MODULE CONST2
-C   [3] PHYSICAL CONSTANTS
+!   [3] PHYSICAL CONSTANTS
        MODULE CONST3
       REAL*8  UMAX,DX_P,DT_P,RE_LB,DX_LB,TauF
      &       ,DT_LB,p0,C,Co,Cs,densityG,mu
       REAL*8  L_P,BLOK,NU_P,U_P,RE_P,RE_BLC,Ma_P,Ma_LB,BHR
      &       ,T_P,CONT_DTP
       END MODULE CONST3
-C   [4] PARTICLES
+!   [4] PARTICLES
       MODULE CONST4      
       integer,parameter:: sampnumb=1000000 !total particle number
       REAL*8  dp,densityP,Mg,Tg,R,lambdaG,Cunnin,f,Vp,A
@@ -72,9 +72,9 @@ C   [4] PARTICLES
       INTEGER  denumber1(360),
       END MODULE CONST4
 
-C===================================================================================================
+!===================================================================================================
       PROGRAM MAIN
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
@@ -101,8 +101,8 @@ C===============================================================================
       open(319,file='tstep pressure.txt')
       open(320,file='cp.txt')
       open(321,file='curved velocity.txt')
-C     FLUID MODEL 
-C     Macroscopic properties!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!     FLUID MODEL 
+!     Macroscopic properties!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       L_P = 88.0526E-6  ! Channel height (m)
       BHR = 0.5792 ! BLOCK/HEIGHT RATIO~
       BLOK = L_P*BHR !block height (m)
@@ -115,7 +115,7 @@ C     Macroscopic properties!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       RE_P = U_P*L_P/NU_P ! Re based on Channel
 
       pi = 3.141592653589793     
-C   Microscopic properties
+!   Microscopic properties
       C = 1.0  ! C = 1 (always) is the lattice speed
       cs = c/3**0.5 ! speed of sound (2.21)
       DX_LB = DX_P/L_P ! uniform grid size in LATTICE BOLZMANN UNITS
@@ -137,7 +137,7 @@ C   Microscopic properties
       W(1) = 4.d0/9.d0 ! (2.26) in thesis
       W(2:5) = 1.d0/9.d0 ! (2.26) in thesis
       W(6:9) = 1.d0/36.d0 ! (2.26) in thesis
-C   Block Parameters
+!   Block Parameters
       BLKRAD1 = real(YN-2)*BHR*0.5 !the radius of the cylinder 
       BLKCNTY1 =  (YN-2)*0.5 + 2 !the j index of the cylinder center
       BLKCNTX1 =  (XN-1)*0.5  !the i index of the cylinder center
@@ -146,10 +146,10 @@ C   Block Parameters
       BLKBOT1 = BLKCNTY1 - BLKRAD1
       BLKTOP1 = BLKCNTY1 + BLKRAD1
       SOLIDT = 0
-C CYLINDRICAL   
+! CYLINDRICAL   
       DO I = 2,XN-1
             DO J  = 2,YN-1         
-C                 1st CYLINDER  
+!                 1st CYLINDER  
                   SOLIDT1 = (I-BLKCNTX1)**2 + (J-BLKCNTY1)**2
                   IF ( SOLIDT1 <= BLKRAD1**2  )  THEN
                         SOLIDT = SOLIDT + 1 !number of nodes in the solid 
@@ -165,7 +165,7 @@ C                 1st CYLINDER
             write(313,*) (SOLIDX(i)-1.0)/(YN-2),(SOLIDY(i)-1.5)/(YN-2),0,0
       end do
       SFACET=0
-C     1st BALL SURFACE
+!     1st BALL SURFACE
       do I = 1,1440
             fx=int(BLKRAD1*cos(I*pi/720))+BLKCNTX1
             fy=int(BLKRAD1*sin(I*pi/720))+BLKCNTY1
@@ -179,7 +179,7 @@ C     1st BALL SURFACE
       do i=1,SFACET
             write(313,*) (SFACEX(i)-1.0)/(YN-2),(SFACEY(i)-1.5)/(YN-2),0,0
       end do
-C     Particle parameters!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!     Particle parameters!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       dp = 10E-9 ! particle diameter (m)
       ID = dp/BLOK     !20E-6,10E-6,5E-6,1E-6,50E-9
       np = 0          !501 Particle number
@@ -195,50 +195,50 @@ C     Particle parameters!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       Vp = 4.0/3.0*pi*(dp/2.0)**3    ! particle volume (m^3)
       A = densityP*Vp      !mass of particle (kg)
       RelaxT = A/f     ! Relaxation time(s)   
-C     Stokes = RelaxT*U_P/BLOK
+!     Stokes = RelaxT*U_P/BLOK
       Stokes=Cunnin*(dp**2)*(densityP/densityG)* !stokes number
      &  (RE_P*BHR)/(18.0*(BLOK**2))
-C     BROWNIAN 
+!     BROWNIAN 
       BoltC = 1.38E-23 !J/K Boltzmann constant (eq 2.57)
       Fb = (6.0*pi*mu*dp*BoltC*Tg/Cunnin/DT_P)**0.5 !Brounign motion terms (eq 2.57)
       BMD = (BoltC*Tg*Cunnin)/(3.0*pi*mu*dp) !(eq 2.80)
       Pe = U_P*BLOK/BMD !Peclet number (eq 2.80)
-C     Gravigy 
+!     Gravigy 
       Gravity = (densityP-densityG)*Vp*(-9.8) !Gravity terms (eq 2.56)
-c     Gravity = 0
+!     Gravity = 0
       CALL INPUT
       call random_seed()
-C     dimensional location
+!     dimensional location
       dim_x(1:XN) = X(1:XN)*L_P !physical x 
       dim_y(1:YN) = Y(1:YN)*L_P !physical y
-C     Collision BC
-C     CHANNEL WALLS
+!     Collision BC
+!     CHANNEL WALLS
       LeftBD = dim_x(1) + dp/2.0 !the particle can go in x direction of the compusational domain
       RightBD = dim_x(XN) - dp/2.0
       TopBD = dim_y(YN)
       BotBD = dim_y(1)
-C     OBSTACLES
+!     OBSTACLES
 
   
 
 
-C     Initial Setting
-C     TO EXTRACT FLUID & PARTICLE DATA
+!     Initial Setting
+!     TO EXTRACT FLUID & PARTICLE DATA
       CONT = 0
       EXTRCTIME = 50000   
       T_P = 0
       CONT_DTP = 0.0    
-c     to extract steady timestep
+!     to extract steady timestep
       CONT1 = 0  
       EXTRCTIME1 = 5000   
       CONVGENCEU = 1
       CONVGENCEV = 1
-C     TO EXTRACT PARTICLE TRACE
+!     TO EXTRACT PARTICLE TRACE
       CONT2 = 0
       EXTRCTIME2 = 1 !100
-C     TO EXTRACT PERIODICAL DATA
+!     TO EXTRACT PERIODICAL DATA
       Periodcunt = 1.0
-C     ITERATION, TOL, CONSTS
+!     ITERATION, TOL, CONSTS
       TSTEP = 100000000 
       TOL = 1E-6 !residual criteria
       WRITE(3,*) "uIn=",UMAX
@@ -271,33 +271,33 @@ C     ITERATION, TOL, CONSTS
       WRITE(3,*) "Particle Relaxation Time =",RelaxT
       WRITE(3,*) "Stokes Number=",Stokes
       WRITE(3,*) "DT_LB=",DT_LB
-c    STOP
-      DO L = 1,TSTEP
+!    STOP
+    DO L = 1,TSTEP
             IF ( (CONVGENCEU>=TOL) .or. (CONVGENCEV>=TOL) )THEN !!!steady state
-c           if((L<TSTEP))then
-                  CALL FLUID    
-                  CONT1 = CONT1 + 1      
-            end if
-C      particle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            IF ( (CONVGENCEU<TOL) .AND. (CONVGENCEV<TOL) )THEN !!!steady state
-c           IF ( (L>=1) ) THEN
-c           IF ( (L>TSTEP) ) THEN
-                  CONT_DTP = CONT_DTP + DT_P !count time when released particle
-c                 PARTICLE SETS RELEASED
-                  IF ( (CONT_DTP>=5*DT_P) .and. (np<sampnumb) )THEN 
-                        np = np + npset
-C                       Initial Particle velocity for a new particle set
-                        uxp( (np-npset+1) : np ) = U_P  !velocity in x direction of particle
-                        uyp( (np-npset+1) : np ) = 0.000 !velocity in y direction of particle
-C                       Initial Particle position for a new particle set
-                        xp( (np-npset+1) : np) = dim_x(3) !physcial x location of particle
-                        call random_number( yp( (np-npset+1):(np) ) ) !physical y location of particle
-                        yp( (np-npset+1):(np) ) = yp( (np-npset+1):(np) )*L_P
-                        CONT_DTP = 0.0
-                  END IF         
-                  CALL PARTICLES
+!           if((L<TSTEP))then
+				CALL FLUID    
+				CONT1 = CONT1 + 1      
+			end if
+!      particle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			IF ( (CONVGENCEU<TOL) .AND. (CONVGENCEV<TOL) )THEN !!!steady state
+!           IF ( (L>=1) ) THEN
+!           IF ( (L>TSTEP) ) THEN
+				CONT_DTP = CONT_DTP + DT_P !count time when released particle
+!           PARTICLE SETS RELEASED
+                IF ( (CONT_DTP>=5*DT_P) .and. (np<sampnumb) )THEN 
+                    np = np + npset
+!                   Initial Particle velocity for a new particle set
+                    uxp( (np-npset+1) : np ) = U_P  !velocity in x direction of particle
+                    uyp( (np-npset+1) : np ) = 0.000 !velocity in y direction of particle
+!                   Initial Particle position for a new particle set
+                    xp( (np-npset+1) : np) = dim_x(3) !physcial x location of particle
+                    call random_number( yp( (np-npset+1):(np) ) ) !physical y location of particle
+                    yp( (np-npset+1):(np) ) = yp( (np-npset+1):(np) )*L_P
+                    CONT_DTP = 0.0
+                END IF         
+                CALL PARTICLES
             END IF
-C           particle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!           particle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             CONVU(2:XN-1,2:YN-1) = 
             &     (U(2:XN-1,2:YN-1)- OLDU(2:XN-1,2:YN-1))/
             &                        (MAXVAL(U)-MINVAL(U))
@@ -307,37 +307,37 @@ C           particle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             &                        (MAXVAL(V)-MINVAL(V))
             CONVGENCEV = MAXVAL(DABS(CONVV))
             IF ((ABS(MAXVAL(U))>10) .OR. (ABS(MAXVAL(V))>10))THEN
-                  WRITE(4,*) 'DIVERGENT, RESET THE PARAMETERS!!!'
-                  WRITE(4,*) 'MAXU=',MAXVAL(U)
-                  WRITE(4,*) 'MAXV=',MAXVAL(V)
-                  WRITE(4,*) 'L=',L
-                  DO I = 1,XN
-                        DO J = 1,YN
-                              WRITE(39,7) X(I),Y(J),U(I,J),V(I,J)
-                        END DO
-                  END DO
-                  STOP
+                WRITE(4,*) 'DIVERGENT, RESET THE PARAMETERS!!!'
+                WRITE(4,*) 'MAXU=',MAXVAL(U)
+                WRITE(4,*) 'MAXV=',MAXVAL(V)
+                WRITE(4,*) 'L=',L
+                DO I = 1,XN
+                    DO J = 1,YN
+                         WRITE(39,7) X(I),Y(J),U(I,J),V(I,J)
+                    END DO
+                END DO
+                STOP
             END IF
             IF ((L==TSTEP))THEN
-                  WRITE(4,*) 'CONVERGENCE FOR U,V,T HASNT BEEN ENOUGH !!!'
-                  WRITE(4,*) 'L=',L
-                  WRITE(4,*) 'CONVGENCEU=',CONVGENCEU
-                  WRITE(4,*) 'CONVGENCEV=',CONVGENCEV
-                  CALL VORTNSTM
+                WRITE(4,*) 'CONVERGENCE FOR U,V,T HASNT BEEN ENOUGH !!!'
+                WRITE(4,*) 'L=',L
+                WRITE(4,*) 'CONVGENCEU=',CONVGENCEU
+                WRITE(4,*) 'CONVGENCEV=',CONVGENCEV
+                CALL VORTNSTM
             END IF
-            T_P = T_P + DT_P
-            CONT = CONT + 1
-            if (CONT==EXTRCTIME) then      
-                  close(6)
-                  close(7)
-                  close(8)
-                  close(319)
-                  OPEN(6,FILE='U.TXT')
-                  OPEN(7,FILE='tstep VELOCITY.TXT')
-                  OPEN(8,FILE='tstep Particle.TXT')
-                  open(319,file='tstep pressure.txt')
-                  write(7,*) 'VARIABLES = "X","Y","U","V"'
-                  write(7,*) 'ZONE T="present"'
+			T_P = T_P + DT_P
+			CONT = CONT + 1
+			if (CONT==EXTRCTIME) then      
+                close(6)
+                close(7)
+                close(8)
+                close(319)
+                OPEN(6,FILE='U.TXT')
+                OPEN(7,FILE='tstep VELOCITY.TXT')
+                OPEN(8,FILE='tstep Particle.TXT')
+                open(319,file='tstep pressure.txt')
+                write(7,*) 'VARIABLES = "X","Y","U","V"'
+                 write(7,*) 'ZONE T="present"'
                   write(7,*) 'I=',YN,', J=',XN,',F=POINT'
                   DO I = 1,XN
                         DO J = 1,YN
@@ -369,32 +369,32 @@ C           particle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                   write(6,*) 'I=',YN,', J=',1,',F=POINT'
                   DO J = 1,YN
                         WRITE(6,*) Y(J),U(XN/3,J)*Co/U_P
-                  END DO
-                  write(6,*) 'VARIABLES = "Y","U"'
-                  write(6,*) 'ZONE T="present"'
-                  write(6,*) 'I=',YN,', J=',1,',F=POINT'
-                  DO J = 1,YN
-                        WRITE(6,*) Y(J),U(XN*2/3,J)*Co/U_P
-                  END DO
-                  if(capnumb(2)>0)then
-                        capeff = (  capnumb(3) )/(capnumb(3)+capnumb(2))
-                        write(311,*)CONT1,L,capeff,CONVGENCEU,CONVGENCEV
-                        write(312,*)np,capnumb(1),capnumb(2),capnumb(3)
-                  end if
-                  CONT = 0
-         end if
-         OLDU(1:XN,1:YN) = U(1:XN,1:YN)
-         OLDV(1:XN,1:YN) = V(1:XN,1:YN)
-      END DO 
-      call Cp_dimensionless_number
+                END DO
+                write(6,*) 'VARIABLES = "Y","U"'
+                write(6,*) 'ZONE T="present"'
+                write(6,*) 'I=',YN,', J=',1,',F=POINT'
+                DO J = 1,YN
+                    WRITE(6,*) Y(J),U(XN*2/3,J)*Co/U_P
+                END DO
+                if(capnumb(2)>0)then
+                    capeff = (  capnumb(3) )/(capnumb(3)+capnumb(2))
+                    write(311,*)CONT1,L,capeff,CONVGENCEU,CONVGENCEV
+                    write(312,*)np,capnumb(1),capnumb(2),capnumb(3)
+                end if
+                CONT = 0
+		end if
+        OLDU(1:XN,1:YN) = U(1:XN,1:YN)
+        OLDV(1:XN,1:YN) = V(1:XN,1:YN)
+    END DO 
+    call Cp_dimensionless_number
 1     FORMAT(3X,F10.5)
 7     FORMAT(3X,F10.5,3X,F10.5,3X,F10.5,3X,F10.5,3X,F10.3,3X,F10.3)
 8     FORMAT(3X,F10.5,3X,F10.5,3X,F10.3,5X,F10.3,5X,F10.3,5X,F10.3)
       END PROGRAM MAIN
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE INPUT 
-C===================================================================================================
-C     INITIAL VELOCITY, DENSITY AND PRESSURE IN THE 2D CHANNEL
+!===================================================================================================
+!     INITIAL VELOCITY, DENSITY AND PRESSURE IN THE 2D CHANNEL
       USE CONST1
       USE CONST2
       USE CONST3
@@ -423,9 +423,9 @@ C     INITIAL VELOCITY, DENSITY AND PRESSURE IN THE 2D CHANNEL
       Y(1:YN) = Y(1:YN)/real(YN-2)
       X(1:XN) = X(1:XN)/real(YN-2)
       END SUBROUTINE INPUT
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE MacroBC 
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
@@ -434,22 +434,22 @@ C===============================================================================
             U( SOLIDX(I),SOLIDY(I) ) = 0.000
             V( SOLIDX(I),SOLIDY(I) ) = 0.000
       end do
-C     MACROSCOPIC BOUNDARY CONDITIONS 
-C     Left Inlet
+!     MACROSCOPIC BOUNDARY CONDITIONS 
+!     Left Inlet
       U(1,1:YN) = UMAX
       V(1,1:YN) = 0.000
-C     Right Inlet
+!     Right Inlet
       U(XN,1:YN) = 4.0/3.0*U(XN-1,1:YN)-1.0/3.0*U(XN-2,1:YN) !outlet boundary eq(2.38)
       V(XN,1:YN) = 4.0/3.0*V(XN-1,1:YN)-1.0/3.0*V(XN-2,1:YN) !outlet boundary eq(2.39)
       END SUBROUTINE MacroBC
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE MicroBC 
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
       USE CONST4
-C           INLET
+!           INLET
       P(1,1:YN)=( pin(1,1:YN,1)+pin(1,1:YN,3)+pin(1,1:YN,5)       !chapter 3 of On pressure and velocity flow boundary conditions and bounceback for the lattice Boltzmann BGK model, Zou and He, 1997
       &          +2*(pin(1,1:YN,7)+pin(1,1:YN,4)+pin(1,1:YN,8)) )
       &             /((1-U(1,1:YN))/C)
@@ -462,7 +462,7 @@ C           INLET
       &                  ( pIn(1,1:YN,3)-pIn(1,1:YN,5))/2.0
       &                    + P(1,1:YN)*U(1,1:YN)/6.0/C
       &                    - P(1,1:YN)*V(1,1:YN)/2.0/C
-C           OUTLET
+!           OUTLET
       P(XN,1:YN)=( pin(XN,1:YN,1)+pin(XN,1:YN,3)+pin(XN,1:YN,5)
       &          +2*(pin(XN,1:YN,6)+pin(XN,1:YN,2)+pin(XN,1:YN,9)) )
       &             /((1+U(XN,1:YN))/C)
@@ -477,35 +477,35 @@ C           OUTLET
       &                    + P(XN,1:YN)*V(XN,1:YN)/2.0/C
       END SUBROUTINE MicroBC
 
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE ConerBC 
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
       USE CONST4
-! C     Left Top Coner
+! !     Left Top Coner
 !         pIn(1,YN,2) = pIn(1,YN,4)
 !         pIn(1,YN,5) = pIn(1,YN,3)
 !         pIn(1,YN,9) = pIn(1,YN,7)
 !         pIn(1,YN,6) = 0.5*(P(1,YN)-pIn(1,YN,1))-
 !      &                     (pIn(1,YN,4)+pIn(1,YN,7)+pIn(1,YN,3))
 !             pIn(1,YN,8) = pIn(1,YN,6)
-! C     Left Bot Coner
+! !     Left Bot Coner
 !         pIn(1,1,2) = pIn(1,1,4)
 !         pIn(1,1,3) = pIn(1,1,5)
 !         pIn(1,1,6) = pIn(1,1,8)
 !         pIn(1,1,7) = 0.5*(P(1,1)-pIn(1,1,1))-
 !      &                     (pIn(1,1,4)+pIn(1,1,8)+pIn(1,1,5))
 !             pIn(1,1,9) = pIn(1,1,7)
-! C     Right Top Coner
+! !     Right Top Coner
 !         pIn(XN,YN,4) = pIn(XN,YN,2)
 !         pIn(XN,YN,5) = pIn(XN,YN,3)
 !         pIn(XN,YN,8) = pIn(XN,YN,6)
 !         pIn(XN,YN,7) = 0.5*(P(XN,YN)-pIn(XN,YN,1))-
 !      &                     (pIn(XN,YN,3)+pIn(XN,YN,6)+pIn(XN,YN,2))
 !             pIn(XN,YN,9) = pIn(XN,YN,7)
-! C     Right Bot Coner
+! !     Right Bot Coner
 !         pIn(XN,1,4) = pIn(XN,1,2)
 !         pIn(XN,1,3) = pIn(XN,1,5)
 !         pIn(XN,1,7) = pIn(XN,1,9)
@@ -514,9 +514,9 @@ C===============================================================================
 !           pIn(XN,1,8) = pIn(XN,1,6)
       END SUBROUTINE ConerBC
 
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE FLUID 
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
@@ -524,7 +524,7 @@ C===============================================================================
       CALL MacroBC
       CALL MicroBC
       CALL ConerBC
-C     FLUID COLLISION STEP
+!     FLUID COLLISION STEP
       DO J = 1,9
             CU(1:XN,1:YN) = 3.0*(CX(J)*U(1:XN,1:YN)+CY(J)*V(1:XN,1:YN))
             pEq(1:XN,1:YN,J) = W(J)*P(1:XN,1:YN)                              !eq(2.21)
@@ -533,14 +533,14 @@ C     FLUID COLLISION STEP
             pOut(1:XN,1:YN,J) = pIn(1:XN,1:YN,J)-                             !eq(2.13)
             &               (1.0/TauF)*(pIn(1:XN,1:YN,J)-pEq(1:XN,1:YN,J))
       END DO
-C!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-C    REFRENCE : Lattice Boltzmann method for 3-D  Flows with Curved BOundary
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!    REFRENCE : Lattice Boltzmann method for 3-D  Flows with Curved BOundary
       sign2=1
       real_face=0      
       DO I = 1,SFACET
             m = SFACEX(I)-BLKCNTX1
             n = SFACEY(I)-BLKCNTY1
-C           The nodes are nearby the wall surface.(the solid part)
+!           The nodes are nearby the wall surface.(the solid part)
             fpx=sign(sign2,m)
             fpy=sign(sign2,n)
             if((m<BLKRAD1*0.15) .and. (m>-BLKRAD1*0.15)) then
@@ -591,7 +591,7 @@ C           The nodes are nearby the wall surface.(the solid part)
                   &        ,(real_faceY(I)-1.5)/(YN-2),0,0
             end do
       end if
-c     BOUNCE BACK 
+!     BOUNCE BACK 
       pIn(1:XN,YN,5) = pOut(1:XN,1,5)
       pIn(1:XN,YN,8) = pOut(1:XN,1,8)
       pIn(1:XN,YN,9) = pOut(1:XN,1,9)
@@ -599,7 +599,7 @@ c     BOUNCE BACK
       pIn(1:XN,1,3) = pOut(1:XN,YN,3)
       pIn(1:XN,1,6) = pOut(1:XN,YN,6)
 
-C     FLUID STREAMING STEP  
+!     FLUID STREAMING STEP  
        DO J = 1,XN                          !  C0
             DO K = 1,YN
                   pIn(J,K,1) = pOut(J,K,1)
@@ -645,15 +645,15 @@ C     FLUID STREAMING STEP
                   pIn(J,K,9) = pOut(J-1,K+1,9) !   C9
            ENDDO
       ENDDO
-C         ASSEMBLE MACROSCOPIC VARIABLES
-C         density
+!         ASSEMBLE MACROSCOPIC VARIABLES
+!         density
       SpIn(1:XN,1:YN,1) = pIn(1:XN,1:YN,1)
       DO J = 2,9
            SpIn(1:XN,1:YN,1) = SpIn(1:XN,1:YN,1)
            &        + pIn(1:XN,1:YN,J)
       END DO
       P(1:XN,1:YN) = SpIn(1:XN,1:YN,1) 
-C     U COMPONENT
+!     U COMPONENT
       SpIn(1:XN,1:YN,1) = CX(1)*pIn(1:XN,1:YN,1)
       DO J = 2,9   
             SpIn(1:XN,1:YN,1) = SpIn(1:XN,1:YN,1)
@@ -661,7 +661,7 @@ C     U COMPONENT
       END DO
       U(1:XN,1:YN) = SpIn(1:XN,1:YN,1)           
       U(1:XN,1:YN) = C*U(1:XN,1:YN)/P(1:XN,1:YN) 
-C     V COMPONENT
+!     V COMPONENT
       SpIn(1:XN,1:YN,1) = CY(1)*pIn(1:XN,1:YN,1)
       DO J = 2,9   
             SpIn(1:XN,1:YN,1) = SpIn(1:XN,1:YN,1)
@@ -674,15 +674,15 @@ C     V COMPONENT
 !       CALL ConerBC
       END SUBROUTINE FLUID
 
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE PARTICLES 
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
       USE CONST4
-C     PARTICLE EQUATION
-C     Dimensional velocity
+!     PARTICLE EQUATION
+!     Dimensional velocity
       capnumb(1:60) = 0.0
       count(1:sampnumb) = 0
       denumber1(1:360)=0
@@ -710,7 +710,7 @@ C     Dimensional velocity
                   IF (I<=sampnumb)THEN
                         capnumb(2) = capnumb(2) + 1 
                   ENDIF
-C           CYLINDER 1
+!           CYLINDER 1
             ELSEIF ( SOLIDT1 <= ( (BLOK + dp)/2.0 )**2 )THEN
 				IF (I<=sampnumb)THEN
 					capnumb(3) = capnumb(3) + 1  !TOTAL TRAPPED PARTICLES 
@@ -731,36 +731,36 @@ C           CYLINDER 1
 					count(I) = 1
 				END IF
             ELSE
-c               Fluid velocity at RHS of particle
+!               Fluid velocity at RHS of particle
                 XPP = xp(I) + dp/2.0
                 YPP = yp(I)
                 CALL PVELOCITY
                 RhsUx = Uxg
                 RhsUy = Uyg
-C               Fluid velocity at LHS of particle
+!               Fluid velocity at LHS of particle
                 XPP = xp(I) - dp/2.0
                 YPP = yp(I)
 				CALL PVELOCITY
                 LhsUx = Uxg
                 LhsUy = Uyg
-C                Fluid velocity at Top of particle
+!                Fluid velocity at Top of particle
                 XPP = xp(I)
                 YPP = yp(I)+ dp/2.0
                 CALL PVELOCITY
                 TopUx = Uxg
                 TopUy = Uyg
-C               Fluid velocity at Bottom of particle  
+!               Fluid velocity at Bottom of particle  
                 XPP = xp(I)
                 YPP = yp(I)- dp/2.0
                 CALL PVELOCITY
                 BotUx = Uxg
                 BotUy = Uyg
-C               Fluid velocity at the position of the particle
+!               Fluid velocity at the position of the particle
                 XPP = xp(I)
                 YPP = yp(I)
                 CALL PVELOCITY
-c==============================================================================================
-c==============================================================================================
+!==============================================================================================
+!==============================================================================================
                 Repx = dp/Nu_P*abs( Uxg-uxp(I))				!(eq 2.64)
                 Repy = dp/Nu_P*abs( Uyg-uyp(I))
                 Resx = dp**2/Nu_P*( 0.5*abs(RhsUy - LhsUy)/dp )	!(eq 2.65)
@@ -777,31 +777,31 @@ c===============================================================================
                 else
                     slfcy = 0.0524*(0.5*Resy)**0.5
                 End If
-c==============================================================================================
-c==============================================================================================
+!==============================================================================================
+!==============================================================================================
                 sign1 = 1
-C               Fluid lift force without velocity term (kg/s)
+!               Fluid lift force without velocity term (kg/s)
                 Lx = 1.615*densityG*NU_P**0.5*dp**2				!(eq 2.72)
                 & *( abs(RhsUy - LhsUy)/dp )**0.5
                 &   *sign( sign1, (RhsUy - LhsUy)/dp )*slfcx
                 Ly = 1.615*densityG*NU_P**0.5*dp**2				!(eq 2.73)
                 & *( abs(TopUx - BotUx)/dp )**0.5
                 &   *sign( sign1, (TopUx - BotUx)/dp )*slfcy
-C               Bforce    (N)
+!               Bforce    (N)
                 call random_number(U1 )
                 call random_number(U2 )
                 Gx = ( -2.0*log(U1) )**0.5*cos(2.0*pi*U2)		!(eq 2.58)
                 Gy = ( -2.0*log(U1) )**0.5*sin(2.0*pi*U2)
                 Bx = Fb*Gx
                 By = Gravity + Fb*Gy      
-C               Particle velocity (m/s)
+!               Particle velocity (m/s)
                 olduxp(I) = uxp(I)
                 uxp(I) = (olduxp(I) - ( Uxg + Bx/(f+Lx) ) )*exp(-(f+Lx)/A*DT_P) 		!(eq 2.76)
                 &       + Uxg + Bx/(f+Lx)
                 olduyp(I) = uyp(I)
                 uyp(I) = (olduyp(I) - ( Uyg + By/(f+Ly) ) )*exp(-(f+Ly)/A*DT_P)
                 &       + Uyg + By/(f+Ly)
-C               Particle position (m)
+!               Particle position (m)
                 oldxp(I) = xp(I)
                 xp(I) = oldxp(I) + (Uxg + Bx/(f+Lx) )*DT_P + A/(f+Lx)*					!(eq 2.77)
                 &( olduxp(I) - Uxg - Bx/(f+Lx) )*(1.0)*( 1.0-exp(-(f+Lx)*DT_P/A) )
@@ -858,9 +858,9 @@ C               Particle position (m)
       END IF
 4     FORMAT(3X,F10.5,3X,F10.5,3X,F10.5,3X,F10.5,3X,F10.3,3X,F10.3)
       END SUBROUTINE PARTICLES
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE PVELOCITY
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
@@ -883,9 +883,9 @@ C===============================================================================
       Uyg = yr*(UygT - UygB) + UygB
       END SUBROUTINE PVELOCITY
 
-C===================================================================================================
+!===================================================================================================
       SUBROUTINE VORTNSTM 
-C===================================================================================================
+!===================================================================================================
       USE CONST1
       USE CONST2
       USE CONST3
@@ -902,14 +902,14 @@ C===============================================================================
                   &             -(U(I,J+1)-U(I,J-1))/(DX_LB+DX_LB)
             END DO
       END DO         
-C     BC LHS & RHS
+!     BC LHS & RHS
       DO J = 2,YN-1   
             ZETA(1,J) = (V(2,J)-V(1,J))/DX_LB
             &             -(U(1,J+1)-U(1,J-1))/(DX_LB+DX_LB)
             ZETA(XN,J) = (V(XN,J)-V(XN-1,J))/DX_LB
             &             -(U(XN,J+1)-U(XN,J-1))/(DX_LB+DX_LB)
       END DO
-C     BC TOP & BOT
+!     BC TOP & BOT
       DO I = 2,XN-1   
             ZETA(I,1) = (V(I+1,1)-V(I-1,1))/(DX_LB+DX_LB)
             &             -(U(I,2)-U(I,1))/DX_LB
@@ -924,9 +924,9 @@ C     BC TOP & BOT
       END DO
       END SUBROUTINE VORTNSTM
       
-C===================================================================================================				   				   
+!===================================================================================================				   				   
       SUBROUTINE Cp_dimensionless_number 
-C===================================================================================================				   				   
+!===================================================================================================				   				   
       USE CONST1
       USE CONST2
       USE CONST3
